@@ -29,8 +29,17 @@ async function run() {
         })
         //get info
         app.get('/info', async (req, res) => {
-            const info = await infoCollection.find().toArray();
-            res.send(info);
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            let information;
+            if (page || size) {
+                information = await infoCollection.find().skip(page * size).limit(size).toArray();
+            } else {
+
+                information = await infoCollection.find().toArray();
+            }
+
+            res.send(information);
         })
         // delete bill
         app.delete('/info/:id', async (req, res) => {
@@ -50,6 +59,11 @@ async function run() {
             };
             const result = await infoCollection.updateOne(filter, updateDoc, options);
             res.send(result);
+        })
+        // info data count
+        app.get('/infocount', async (req, res) => {
+            const result = await infoCollection.estimatedDocumentCount();
+            res.send({ result })
         })
     }
     finally {
