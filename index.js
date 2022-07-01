@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -31,6 +31,25 @@ async function run() {
         app.get('/info', async (req, res) => {
             const info = await infoCollection.find().toArray();
             res.send(info);
+        })
+        // delete bill
+        app.delete('/info/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = infoCollection.deleteOne(query);
+            res.send(result);
+        })
+        //edit info
+        app.put('/info/:id', async (req, res) => {
+            const id = req.params.id;
+            const info = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: info,
+            };
+            const result = await infoCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
         })
     }
     finally {
